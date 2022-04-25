@@ -166,6 +166,8 @@ class UgatitSadalinHourglass(object):
         # training loop
         print('training start !')
         start_time = time.time()
+        G_losses = []
+        D_losses = []
         for step in range(start_iter, self.iteration + 1):
             if self.decay_flag and step > (self.iteration // 2):
                 self.G_optim.param_groups[0]['lr'] -= (self.lr / (self.iteration // 2))
@@ -294,7 +296,7 @@ class UgatitSadalinHourglass(object):
             self.genB2A.apply(self.W_Clipper)
 
             if step % 10 == 0:
-                print("[%5d/%5d] time: %4.4f d_loss: %.8f, g_loss: %.8f" % (step, self.iteration, time.time() - start_time, Discriminator_loss, Generator_loss))
+                print("[%5d/%5d]  d_loss: %.8f, g_loss: %.8f" % (step, self.iteration, Discriminator_loss, Generator_loss))
             if step % self.print_freq == 0:
                 train_sample_num = 5
                 test_sample_num = 5
@@ -384,10 +386,22 @@ class UgatitSadalinHourglass(object):
                 cv2.imwrite(os.path.join(self.result_dir, self.dataset, 'img', 'A2B_%07d.png' % step), A2B * 255.0)
                 cv2.imwrite(os.path.join(self.result_dir, self.dataset, 'img', 'B2A_%07d.png' % step), B2A * 255.0)
                 self.genA2B.train(), self.genB2A.train(), self.disGA.train(), self.disGB.train(), self.disLA.train(), self.disLB.train()
-
+            
+            G_losses.append(Generator_loss.item())
+            D_losses.append(Discriminator_loss.item())
+            
             if step % self.save_freq == 0:
                 self.save(os.path.join(self.result_dir, self.dataset, 'model'), step)
-
+            if step % 100 ==0;
+                plt.figure(figsize = (10, 5))
+                plt.title("Generator and Discriminator Loss During Training")
+                plt.plot(G_losses, label = "G")
+                plt.plot(D_losses, label = "D")
+                plt.xlabel("iterations")
+                plt.ylabel("Loss")
+                plt.legend()
+                plt.show()
+                plt.savefig('loss.jpg')
             if step % 1000 == 0:
                 params = {}
                 
@@ -407,6 +421,14 @@ class UgatitSadalinHourglass(object):
                     params['disLA'] = self.disLA.state_dict()
                     params['disLB'] = self.disLB.state_dict()
                 torch.save(params, os.path.join(self.result_dir, self.dataset + '_params_latest.pt'))
+                
+                g = np.array(G_losses)
+                d = np.array(D_losses)
+                np.save("g.npy",g)
+                np.save("d.npy",d)
+
+            
+             
 
     def save(self, dir, step):
         params = {}
