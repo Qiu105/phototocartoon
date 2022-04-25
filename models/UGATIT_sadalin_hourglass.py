@@ -392,7 +392,7 @@ class UgatitSadalinHourglass(object):
             
             if step % self.save_freq == 0:
                 self.save(os.path.join(self.result_dir, self.dataset, 'model'), step)
-            if step % 100 ==0;
+            if step % 100 == 0:
                 plt.figure(figsize = (10, 5))
                 plt.title("Generator and Discriminator Loss During Training")
                 plt.plot(G_losses, label = "G")
