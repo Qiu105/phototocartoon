@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from .networks import *
 from utils import *
 from glob import glob
+import matplotlib.pyplot as plt
 from .face_features import FaceFeatures
 
 
